@@ -1,19 +1,36 @@
 on:
   push:
     branches:
-      - master
+      - main
   workflow_call:
 
-name: Build & publish
-
+name: Build and test
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+        fail-fast: false
+        matrix:
+          include:
+            - os: ubuntu-20.04
+              config_args: ""
+              packages: "libpam0g-dev pamtester"
     steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-      - name: Install PAM dev files
-        run: sudo apt-get install -y libpam0g-dev
+      - uses: actions/checkout@v4
+      - name: Install basic dependencies
+        run: |
+          apt-get update && apt-get install -y sudo
+          sudo apt-get install -y build-essential git curl
+      - name: Set Directory Variables
+        run: |
+          set_dir() {
+            echo "$1=$(git rev-parse --show-toplevel)/$2" >> $GITHUB_ENV
+          }    
+
+          set_dir ROOT_DIR ""
+          set_dir DEBUG_DIR "target/debug"
+          set_dir RELEASE_DIR "target/release"
+          set_dir BASIC_AUTH_DIR "examples/basic-auth"
       - name: Use cargo cache
         uses: actions/cache@v2
         with:
@@ -23,19 +40,17 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: Publish module
-        uses: katyo/publish-crates@v1
-        with:
-          registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-          check-repo: ${{ github.event_name == 'push' }}
-          ignore-unpublished-changes: true
-          # Only publish pam module, as pam-http and pam-sober are example projects
-          path: pam
-          args: --package pam-bindings
+          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Install the rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Build and test pam module
+        env:
+          CONFIGURE_ARGS: ${{ matrix.config_args }}
+          PACKAGES: ${{ matrix.packages }}
+          ROOT_DIR: ${{ env.ROOT_DIR }}
+          DEBUG_DIR: ${{ env.DEBUG_DIR }}
+          RELEASE_DIR: ${{ env.RELEASE_DIR }}
+          BASIC_AUTH_DIR: ${{ env.BASIC_AUTH_DIR }}
+        run: |
+          echo "Running basic-auth example build and test"
+          $BASIC_AUTH_DIR/build_and_test.sh

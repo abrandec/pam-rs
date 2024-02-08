@@ -1,16 +1,9 @@
-[package]
+[workspace]
+members = ["pam", "examples/basic-auth"]
 
-name = "pam-bindings"
-description = "PAM bindings for Rust"
-version = "0.1.1"
-authors = [ "Anthony Nowell <anowell@gmail.com>" ]
-repository = "https://github.com/anowell/pam-rs"
-readme = "../README.md"
-keywords = ["pam", "ffi", "linux", "authentication"]
+[workspace.package]
+version = "0.0.1"
+edition = "2021"
 license = "MIT"
-
-[lib]
-name = "pam"
-
-[dependencies]
-libc = "0.2.97"
+authors = ["Anthony Nowell <anowell@gmail.com>", "Abran DeCarlo <abrandecarlo@protonmail.com>"]
+publish = false
