@@ -8,14 +8,6 @@ interact with PAM.  The library is incomplete - currently it supports a subset
 of functions for use in a pam authentication module.  A pam module is a shared
 library that is invoked to authenticate a user, or to perform other functions.
 
-## 🌐 [pam-http](pam-http)
-
-An example of using pam-rs by performing HTTP basic access auth to authenticate users.
-
-## 🍻 [pam-sober](pam-sober)
-
-If you aren't sober enough for basic math, you can't login!
-
 ### Credits
 
 The contents of this repo are heavily borrowed from:
