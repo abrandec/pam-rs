@@ -11,4 +11,4 @@ name = "basic_auth"
 crate-type = ["cdylib"]
 
 [dependencies]
-pam-bindings = { path = "../../pam" }
+pam-bindings = { path = "../../" }
